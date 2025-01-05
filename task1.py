@@ -1,67 +1,98 @@
-"""
-Assessment 2
-
-Hand-in by 09/01/2025 by 1600
-
-By Jake Morgan
-"""
 
 # Function to prompt the user to input numbers. Checks should be perform so that the numbers are positive ints
-def get_positive_numbers():
-    positive_ints = []
+def get_positive_numbers() -> list:
+    """Function to ask the user to enter a specified amount of integers.
+
+    Returns:
+        list: The list of entered numbers from the user.
+    """
+    
+    positive_ints = list()
 
     print("Please enter the amount of numbers you'd like to enter below.")
-    input_amount: int = int(input("[]: "))
-
+    while True:
+        try:
+            input_amount: int = int(input("[]: ").strip())
+            break
+        except:
+            print("Please enter a valid integer.")
+        
     # Loops the amount of times the user had input
-    for i in range(input_amount):
+    for _ in range(0, input_amount):
         print("\nPlease enter a positive whole number.")
 
         # Loops until a correct input is present which breaks the loop
-        while(True):  
-            num_input: str = input("[]: ").strip()
-            # If there is an input and its a positive integer, add it to the list
-            if num_input != "" and int(num_input) >= 0:
-                positive_ints.append(int(num_input))
+        while True:  
+            # If there is an input and its a positive integer, add it to the listenter a positive number.")
+            try:
+                num_input: int = int(input("[]: ").strip())
+                positive_ints.append(num_input)
                 break
-            else:
-                print("Please enter a positive number.")
+            except:
+                print("Please enter a valid integer.")
 
     return positive_ints
 
 # Function to remove duplicates from the list, prints the duplicted numbers and returns a list with no duplicates
-def remove_duplicates(numbers):
-    unique_numbers = []
+def remove_duplicates(numbers: list) -> list:
+    """Takes the users entered numbers as a parameter and removes any duplicate numbers
+    from the list.
 
+    Args:
+        numbers (list, optional): The user's entered numbers.
+
+    Returns:
+        list: The list of only unique numbers.
+    """
+    unique_numbers = list()
+
+    # Loops through the numbers list and checks if the number is in unique numbers if not it'll add it.
     for i in range(len(numbers)):
         if numbers[i] not in unique_numbers:
             unique_numbers.append(numbers[i])
+        else:
+            print(f"Duplicate: Removed {numbers[i]}")
 
     return unique_numbers
 
 # Function to count the number of unique numbers
-def count_unique_numbers(numbers):
+def count_unique_numbers(numbers: list) -> int:
+    """Counts the amount of unique numbers in the users given list.
+
+    Args:
+        numbers (list, optional): The user's entered numbers.
+
+    Returns:
+        int: The amount of unique numbers.
+    """
     ammount_unique_nums: int = 0
 
     unique_numbers = remove_duplicates(numbers)
 
-    for i in unique_numbers:
+    for _ in unique_numbers:
         ammount_unique_nums += 1
 
     return ammount_unique_nums
 
 # Function to calculate the product of numbers
-def calculate_product(numbers):
-    nums_product: int = 0
+def calculate_product(numbers: list) -> int:
+    """Simple function to calculate the product of the numbers
 
+    Args:
+        numbers (list, optional): _description_.
+
+    Returns:
+        int: _description_
+    """
+    # Loops through all numbers multiplying them together.
     running_total: int = 1
     for i in numbers:
         running_total *= i
 
-    return nums_product
+    return running_total
 
 # Function to calculate the range of numbers
-def calculate_range(numbers):
+def calculate_range(numbers: list) -> int:
     nums_range: int = 0
 
     # Find the larges and smallest values
@@ -79,7 +110,7 @@ def calculate_range(numbers):
     return nums_range
 
 # Function to calculate the variance of numbers
-def calculate_variance(numbers):
+def calculate_variance(numbers: list) -> int:
     nums_var: int = 0
 
     # Calculate the mean of the data
@@ -101,7 +132,7 @@ def calculate_variance(numbers):
     return nums_var
 
 # Function to separate even and odd numbers
-def separate_even_odd(numbers):
+def separate_even_odd(numbers: list) -> list:
     even_numbers = []
     odd_numbers = []
 
@@ -127,38 +158,47 @@ There are {len(even_numbers)} even and {len(odd_numbers)} odd numbers.
     """
 
     long_text_two = f"""
-Your numbers had a product of {product}, a range of {range_val}, and a variance of {variance}.
+Your numbers had a product of {product}, 
+a range of {range_val}, 
+and a variance of {"{:.2f}".format(variance)}.
     """
 
     print(long_text_one)
 
-    print("Your set of unique numbers", *removed_duplicates, sep=", ")
+    if len(removed_duplicates) == 0:
+        print("Your set contained no unqiue numbers.")
+    else:
+        print(f"Your set of unique numbers: {removed_duplicates}")
     
-    print("Your set of even numbers", *even_numbers, sep=", ")
+    if len(even_numbers) == 0:
+        print("Your set contained no even numbers.")
+    else:
+        print(f"Your set of even numbers: {even_numbers}")
 
-    print("Your set of odd numbers", *odd_numbers, sep=", ")
+    if len(odd_numbers) == 0:
+        print("Your set contained no odd numbers.") 
+    else:
+        print(f"Your set of odd numbers: {odd_numbers}")
 
     print(long_text_two)
 
 
 # Main function to control the flow of the program
 def main():
-   
-    numbers = get_positive_numbers()
-    for num in numbers:
-       print(f"{num},")
+    num_list: list = get_positive_numbers()
+    print(*num_list,)
 
-    even_numbers, odd_numbers = separate_even_odd(numbers)
+    even_numbers, odd_numbers = separate_even_odd(num_list)
 
     display_results(
-        count_unique_numbers(numbers),
-        remove_duplicates(numbers),
+        count_unique_numbers(num_list),
+        remove_duplicates(num_list),
         even_numbers,
         odd_numbers,
-        len(numbers),
-        calculate_product(numbers),
-        calculate_range(numbers),
-        calculate_variance(numbers)
+        len(num_list),
+        calculate_product(num_list),
+        calculate_range(num_list),
+        calculate_variance(num_list)
     )
 
 
