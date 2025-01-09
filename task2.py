@@ -196,111 +196,6 @@ def get_dictionary(source: list = read_from_file("dictionary.txt")) -> list:
     
     return dictionary
     
-    
-def get_guess(answer: str, start_time: float, is_hardmode: bool, correct_letters: list) -> str:
-    """Returns the user's guess if it is valid
-
-    Args:
-        answer (str): The hidden word to guess.
-
-    Returns:
-        str: The guess made by the user
-    """
-    dictionary = get_dictionary()
-    
-    while True: # Loop to get guess
-        print("Enter your guess or [Q] to abandon the game:")
-        guessed_word = input(" :: ").strip().lower()
-        
-        if guessed_word == "q" or guessed_word == "h": # If it is to quit.
-            return guessed_word
-        
-        if len(guessed_word) != len(answer): # If the inputs length is incorrect.
-            print(f"Your guess must be {len(answer)} letters long.")
-            continue
-        
-        if is_hardmode and len(correct_letters) != 0: # If its hardmode and there have been correct guesses.
-            
-            # Counter to store the amount of correct letters used by the user.
-            count: int = 0
-            
-            for char in guessed_word.upper():
-                if char in correct_letters: # Increase the count if the player uses a correct letter.
-                    count += 1
-                    
-            if count != len(correct_letters): # If the amount of correct letters is not equal to used ones.
-                return "@"
-            
-        if guessed_word not in dictionary: # If the guessed word was not in the dictionary.
-            return "!"
-        
-        if (time.time() - start_time) >= 30: # If the turn is longer than 30 seconds.
-            return "#"
-        
-        return guessed_word
-
-
-def get_clue(answer: str, guess: str) -> str:
-    """Generates the clue for the user and returns the line
-
-    Args:
-        answer (str): The hidden word to guess.
-        guess (str): The user's input.
-
-    Returns:
-        str: The clue for the user.
-    """
-    colour_clue: list = [""] * len(guess)
-    txt_clue: list = [""] * len(guess)
-    answer_chars: list = list(answer)
-    
-    # First pass: checks for items in correct positions
-    for i, char in enumerate(guess):
-        if char == answer[i]:
-            colour_clue[i] = OutColours.GREEN + char.upper() + OutColours.ENDC
-            txt_clue[i] = "*"
-            answer_chars[i] = None # Mark as used
-            
-    # Second pass: Correct letters in wrong position
-    for i, char in enumerate(guess):
-        if txt_clue[i] == "": # If the character was not a match in the first pass
-            if char in answer_chars:
-                answer_index = answer_chars.index(char) 
-                colour_clue[i] = OutColours.YELLOW + char.upper() + OutColours.ENDC
-                txt_clue[i] = ("+")
-                answer_chars[answer_index] = None # Mark as used
-                    
-            else: # If the charcter was found, mark as incorrect
-                colour_clue[i] = OutColours.RED + char.upper() + OutColours.ENDC
-                txt_clue[i] = "_"
-            
-    return " | ".join(colour_clue) + "\n\t" + " | ".join(txt_clue)
-    
-
-def get_hint(answer: str, found_letters: list) -> str:
-    """Function to return a hint to the player when asked for.
-
-    Args:
-        answer (str): The current hidden word.
-        found_letters (list): The current letters found by the player.
-
-    Returns:
-        str: The hint, a random letter in the answer.
-    """
-    # Split the answer into a list
-    answer_list: list = list(answer)
-    
-    # Choose the random letter
-    rnd_choice: str = rnd.choice(answer_list)
-    
-    # Return the hint unless it is already been found by the player
-    return (
-        rnd_choice 
-        if rnd_choice not in found_letters 
-        else get_hint(answer, found_letters)
-    )
-    
-
 
 def get_used_letters(past_guesses: list) -> list:
     """This function returns all used letters in previous guesses
@@ -447,7 +342,116 @@ Please enter an option,
     
     else: # If not recall the function
         return get_menu_input(name)
+
+
+def get_clue(answer: str, guess: str, past_guesses: list) -> str:
+    """Generates the clue for the user and returns the line
+
+    Args:
+        answer (str): The hidden word to guess.
+        guess (str): The user's input.
+
+    Returns:
+        str: The clue for the user.
+    """
+    colour_clue: list = [""] * len(guess)
+    txt_clue: list = [""] * len(guess)
+    answer_chars: list = list(answer)
     
+    # First pass: checks for items in correct positions
+    for i, char in enumerate(guess):
+        if char == answer[i]:
+            colour_clue[i] = (
+                OutColours.GREEN + char.upper() + OutColours.ENDC
+            )
+            txt_clue[i] = "*"
+            answer_chars[i] = None # Mark as used
+            
+    # Second pass: Correct letters in wrong position
+    for i, char in enumerate(guess):
+        if txt_clue[i] == "": # If the character was not a match in the first pass
+            if char in answer_chars:
+                answer_index = answer_chars.index(char) 
+                colour_clue[i] = (
+                    OutColours.YELLOW + char.upper() + OutColours.ENDC
+                )
+                txt_clue[i] = ("+")
+                answer_chars[answer_index] = None # Mark as used
+                    
+            else: # If the charcter was found, mark as incorrect
+                colour_clue[i] = (
+                    OutColours.RED + char.upper() + OutColours.ENDC
+                )
+                txt_clue[i] = "_"
+            
+    return (
+        f"{past_guesses.index(guess) + 1}: " + " | ".join(colour_clue) + "\n\t   " + " | ".join(txt_clue)
+    )
+    
+
+def get_hint(answer: str, found_letters: list) -> str:
+    """Function to return a hint to the player when asked for.
+
+    Args:
+        answer (str): The current hidden word.
+        found_letters (list): The current letters found by the player.
+
+    Returns:
+        str: The hint, a random letter in the answer.
+    """
+    # Filter out letters that have already been found
+    remaining_letters = [char for char in answer if char.upper() not in found_letters]
+    
+    # Check if there are any remaining letters to provide as a hint
+    if not remaining_letters:
+        return "No hints available! All letters have been found."
+    
+    # Choose a random letter from the remaining letters
+    return "Your hint is "+rnd.choice(remaining_letters).upper()
+    
+
+def get_guess(answer: str, start_time: float, is_hardmode: bool, correct_letters: list, hint_used: bool) -> str:
+    """Returns the user's guess if it is valid
+
+    Args:
+        answer (str): The hidden word to guess.
+
+    Returns:
+        str: The guess made by the user
+    """
+    dictionary = get_dictionary()
+    
+    while True: # Loop to get guess
+        print("Enter your guess or [Q] to abandon the game:")
+        guessed_word = input(" :: ").strip().lower()
+        
+        if guessed_word == "q" or (guessed_word == "h" and not hint_used): # If it is to quit.
+            return guessed_word
+        
+        if len(guessed_word) != len(answer): # If the inputs length is incorrect.
+            print(f"Your guess must be {len(answer)} letters long.")
+            continue
+        
+        if is_hardmode and len(correct_letters) != 0: # If its hardmode and there have been correct guesses.
+            
+            # Counter to store the amount of correct letters used by the user.
+            count: int = 0
+            
+            for char in guessed_word.upper():
+                if char in correct_letters: # Increase the count if the player uses a correct letter.
+                    count += 1
+                    
+            if count != len(correct_letters): # If the amount of correct letters is not equal to used ones.
+                return "@"
+            
+        if guessed_word not in dictionary: # If the guessed word was not in the dictionary.
+            return "!"
+        
+        if (time.time() - start_time) >= 30: # If the turn is longer than 30 seconds.
+            return "#"
+        
+        return guessed_word
+
     
 #endregion
 
@@ -495,6 +499,9 @@ You have {lives} remaining\n
 {incorrect_letters_str}
         """)
 
+    # DEBUGGING
+    # print(f"ANSWER: {answer}\n\n")
+    
 
 def main_menu():
     """Function to control the inputs for the main menu.
@@ -550,6 +557,7 @@ def game_loop(player_name: str):
     correct_letters: list = list()
     lives: int = 6
     clue: str = ""
+    hint_used: bool = False
     
     # Start timer.
     start_time: time = time.time()
@@ -563,22 +571,23 @@ def game_loop(player_name: str):
         
         # Find correct letters.
         for char in answer.upper():
-            if char in used_letters and char not in correct_letters:
+            if char in used_letters and correct_letters.count(char) < answer.upper().count(char):
                 correct_letters.append(char.upper())
         
         display_game(clue, lives, used_letters, answer, hardmode)
         
         # Get the guess from the user.
         turn_start = time.time()
-        guess = get_guess(answer, turn_start, hardmode, correct_letters)  
+        guess = get_guess(answer, turn_start, hardmode, correct_letters, hint_used)  
         
         if guess.upper() == "Q": # If the user wants to quit.
             print("You quit the game!")
             break
                 
-        if guess.upper() == "H": # If the user wants a hint.
+        if guess.upper() == "H" and hint_used == False: # If the user wants a hint.
             hint: str = get_hint(answer, correct_letters)
-            print(f"\nYour hint is {hint.upper()}!")
+            hint_used = True
+            print(hint)
             lives -= 1
             input("\nPress enter to continue. . .")
             continue        
@@ -612,7 +621,7 @@ def game_loop(player_name: str):
         
         # Generate clue output from previous guesses.
         for word in past_guesses:
-            clue += "\t" + get_clue(answer, word) + "\n"
+            clue += "\t" + get_clue(answer, word, past_guesses) + "\n"
         
         # Reduces the guesses by 1.
         lives -= 1

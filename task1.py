@@ -6,6 +6,39 @@ def clear_screen():
     print("\033c", end="") # Clear the screen
 
 
+def get_postive_input(out_str: str) -> int:
+    """Gets a single postiive integer input
+
+    Args:
+        out_str (str): The output before the input for the user
+
+    Returns:
+        int: The integer value above 0
+    """
+    clear_screen()
+    
+    print(out_str)
+    
+    # If there is an input and its a positive integer, add it to the listenter a positive number.                
+    num_input: str = input(" :: ").strip()
+    
+    try:
+        int_val = int(num_input)
+        if int_val >= 1: # If the value is positive save it
+            return int_val
+        
+        else: # If not output the appropriate message
+            print("Please enter a integer above 0.")
+            input("Press enter to continue...")
+            
+    except: # Catch for non number values
+        print("Please enter a valid integer.")
+        input("Press enter to continue...")
+        
+    return get_postive_input(out_str)
+
+
+
 def get_positive_numbers() -> list:
     """Function to ask the user to enter a specified amount of integers.
 
@@ -16,34 +49,32 @@ def get_positive_numbers() -> list:
     clear_screen()
     
     positive_ints = list()
+    
+    # Prepare output
+    amount_str = """
+Welcome!               
 
-    while True:
-        clear_screen()
-        print("\n\nPlease enter the amount of numbers you'd like to enter below.")
-        try:
-            input_amount: int = int(input(" :: ").strip())
-            break
-        except:
-            print("Please enter a valid integer.")
+This program is designed to give you information about your set of numbers.
+
+Now please enter the amount of numbers you'd like to enter below."""
+    
+    input_amount: int = get_postive_input(amount_str)
         
     # Loops the amount of times the user had input
     for i in range(0, input_amount):
-        # Loops until a correct input is present which breaks the loop
-        while True:  
-            
-            clear_screen()
-            print(f"\nYour entered numbers so far\n\t:: {positive_ints}")
-            print(f"\nNumbers remaining: {input_amount - i}")
-            print("\nPlease enter a positive whole number.")
-            
-            # If there is an input and its a positive integer, add it to the listenter a positive number.
-            try:
-                num_input: int = int(input(" :: ").strip())
-                positive_ints.append(num_input)
-                break
-            except:
-                print("Please enter a valid integer.")
-
+        
+        # Output the information
+        input_str = f"""
+        \nYour entered numbers so far\n\t:: {positive_ints}
+        \nNumbers remaining: {input_amount - i}
+        \nPlease enter a positive whole number.
+        """
+        
+        # Add input to the listenter a positive number.                
+        num_input: str = get_postive_input(input_str)
+        
+        positive_ints.append(num_input)
+                
     return positive_ints
 
 
@@ -52,7 +83,7 @@ def remove_duplicates(numbers: list) -> list:
     from the list.
 
     Args:
-        numbers (list, optional): The user's entered numbers.
+        numbers (list, optional): The list of numbers.
 
     Returns:
         list: The list of only unique numbers.
@@ -74,10 +105,10 @@ def calculate_product(numbers: list) -> int:
     """Simple function to calculate the product of the numbers
 
     Args:
-        numbers (list, optional): _description_.
+        numbers (list, optional): The list of numbers.
 
     Returns:
-        int: _description_
+        int: The product of the numbers
     """
     # Loops through all numbers multiplying them together.
     running_total: int = 1
@@ -227,9 +258,9 @@ A total of {count} numbers.
     print(f"""
 Your calculations:
 
-Product\n\t:: {product}
-Range\n\t:: {range_val}
-Variance\n\t:: {variance:.2f}""")
+Product\n\t:: {product:,}
+Range\n\t:: {range_val:,}
+Variance\n\t:: {variance:,.2f}""")
 
 
 def main():
